@@ -29,19 +29,47 @@ namespace Cross
 
         public bool PlaceWord(Word word)
         {
-            for (int y = 0; y < grid.GetLength(1); y++)
+            if (words.Count == 0)
             {
-                for (int x = 0; x < grid.GetLength(0); x++)
+                // Разместим первое слово в центре
+                AddWord(word, grid.GetLength(0) / 2, grid.GetLength(1) / 2, true);
+                return true;
+            }
+
+            foreach (var existingWord in words)
+            {
+                for (int i = 0; i < existingWord.Text.Length; i++)
                 {
-                    if (CanPlaceWord(word, x, y, true))
+                    for (int j = 0; j < word.Text.Length; j++)
                     {
-                        AddWord(word, x, y, true);
-                        return true;
-                    }
-                    if (CanPlaceWord(word, x, y, false))
-                    {
-                        AddWord(word, x, y, false);
-                        return true;
+                        if (existingWord.Text[i] == word.Text[j])
+                        {
+                            int x = existingWord.Position.X;
+                            int y = existingWord.Position.Y;
+
+                            if (existingWord.IsHorizontal)
+                            {
+                                x += i;
+                                y -= j;
+
+                                if (CanPlaceWord(word, x, y, false))
+                                {
+                                    AddWord(word, x, y, false);
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                x -= j;
+                                y += i;
+
+                                if (CanPlaceWord(word, x, y, true))
+                                {
+                                    AddWord(word, x, y, true);
+                                    return true;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -52,7 +80,8 @@ namespace Cross
         {
             if (isHorizontal)
             {
-                if (x + word.Text.Length > grid.GetLength(0)) return false;
+                if (x < 0 || x + word.Text.Length > grid.GetLength(0) || y < 0 || y >= grid.GetLength(1))
+                    return false;
 
                 for (int i = 0; i < word.Text.Length; i++)
                 {
@@ -64,7 +93,8 @@ namespace Cross
             }
             else
             {
-                if (y + word.Text.Length > grid.GetLength(1)) return false;
+                if (x < 0 || x >= grid.GetLength(0) || y < 0 || y + word.Text.Length > grid.GetLength(1))
+                    return false;
 
                 for (int i = 0; i < word.Text.Length; i++)
                 {
